@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:stepper_widget/widgets/custom_button.dart';
 import 'package:stepper_widget/widgets/custom_input.dart';
 
 class FormPage extends StatefulWidget {
@@ -10,6 +9,7 @@ class FormPage extends StatefulWidget {
 }
 
 class _FormPageState extends State<FormPage> {
+  int currentStep = 0;
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -21,43 +21,30 @@ class _FormPageState extends State<FormPage> {
           centerTitle: true,
         ),
         body: Container(
-          padding: const EdgeInsets.all(20),
-          child: ListView(
-            children: [
-              CustomInput(
-                hint: "City and State",
-                inputBorder: OutlineInputBorder(),
-              ),
-              CustomInput(
-                hint: "Postal Code",
-                inputBorder: OutlineInputBorder(),
-              ),
-              const CustomInput(
-                hint: "Address",
-                inputBorder: OutlineInputBorder(),
-              ),
-              const CustomInput(
-                hint: "City and State",
-                inputBorder: OutlineInputBorder(),
-              ),
-              const CustomInput(
-                hint: "Postal Code",
-                inputBorder: OutlineInputBorder(),
-              ),
-              const CustomInput(
-                hint: "Bio",
-                inputBorder: OutlineInputBorder(),
-              ),
-              CustomBtn(
-                title: const Text(
-                  "Save",
-                  style: TextStyle(color: Colors.white),
-                ),
-                callback: () {},
-              )
-            ],
-          ),
-        ),
+            padding: const EdgeInsets.all(20),
+            child: Stepper(
+              type: StepperType.vertical,
+              currentStep: currentStep,
+              onStepCancel: () => currentStep == 0
+                  ? null
+                  : setState(() {
+                      currentStep -= 1;
+                    }),
+              onStepContinue: () {
+                bool isLastStep = (currentStep == getSteps().length - 1);
+                if (isLastStep) {
+                  //Do something with this information
+                } else {
+                  setState(() {
+                    currentStep += 1;
+                  });
+                }
+              },
+              onStepTapped: (step) => setState(() {
+                currentStep = step;
+              }),
+              steps: getSteps(),
+            )),
       ),
     );
   }
@@ -65,6 +52,8 @@ class _FormPageState extends State<FormPage> {
   List<Step> getSteps() {
     return <Step>[
       Step(
+        state: currentStep > 0 ? StepState.complete : StepState.indexed,
+        isActive: currentStep >= 0,
         title: const Text("Account Info"),
         content: Column(
           children: const [
@@ -80,7 +69,9 @@ class _FormPageState extends State<FormPage> {
         ),
       ),
       Step(
-        title: const Text("Account Info"),
+        state: currentStep > 1 ? StepState.complete : StepState.indexed,
+        isActive: currentStep >= 1,
+        title: const Text("Address"),
         content: Column(
           children: const [
             CustomInput(
@@ -95,20 +86,15 @@ class _FormPageState extends State<FormPage> {
         ),
       ),
       Step(
-        title: const Text("Account Info"),
+        state: currentStep > 2 ? StepState.complete : StepState.indexed,
+        isActive: currentStep >= 2,
+        title: const Text("Misc"),
         content: Column(
-          children: [
-            const CustomInput(
+          children: const [
+            CustomInput(
               hint: "Bio",
               inputBorder: OutlineInputBorder(),
             ),
-            CustomBtn(
-              title: const Text(
-                "Save",
-                style: TextStyle(color: Colors.white),
-              ),
-              callback: () {},
-            )
           ],
         ),
       ),
